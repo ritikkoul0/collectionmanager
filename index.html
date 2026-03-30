@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Collections</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ My Collections</h1>
+            <p class="subtitle">Curate and organize your favorite items from around the web</p>
+        </header>
+
+        <div class="controls">
+            <button id="newCollectionBtn" class="btn btn-primary">
+                <span class="icon">+</span> New Collection
+            </button>
+        </div>
+
+        <div id="collectionsContainer" class="collections-container">
+            <!-- Collections will be dynamically added here -->
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📦</div>
+            <h2>No collections yet</h2>
+            <p>Create your first collection to start organizing your favorite items!</p>
+            <button class="btn btn-primary" onclick="openCollectionModal()">
+                Get Started
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal for creating/editing collection -->
+    <div id="collectionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Create New Collection</h2>
+                <button class="close-btn" onclick="closeCollectionModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="collectionId">
+                <div class="form-group">
+                    <label for="collectionName">Collection Name</label>
+                    <input type="text" id="collectionName" placeholder="e.g., Tech Gadgets, Fashion Finds">
+                </div>
+                <div class="form-group">
+                    <label for="collectionDescription">Description (optional)</label>
+                    <textarea id="collectionDescription" rows="3" placeholder="What's this collection about?"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeCollectionModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCollection()">Save Collection</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing item -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="itemModalTitle">Add New Item</h2>
+                <button class="close-btn" onclick="closeItemModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="itemCollectionId">
+                <input type="hidden" id="itemId">
+                <div class="form-group">
+                    <label for="itemTitle">Item Title</label>
+                    <input type="text" id="itemTitle" placeholder="Product name">
+                </div>
+                <div class="form-group">
+                    <label for="itemImage">Image URL</label>
+                    <input type="url" id="itemImage" placeholder="https://example.com/image.jpg">
+                    <small>Paste the image URL from the product page</small>
+                </div>
+                <div class="form-group">
+                    <label for="itemDescription">Description (optional)</label>
+                    <textarea id="itemDescription" rows="3" placeholder="Why do you like this item?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="itemLink">Product Link</label>
+                    <input type="url" id="itemLink" placeholder="https://example.com/product">
+                </div>
+                <div class="form-group">
+                    <label for="itemPrice">Price (optional)</label>
+                    <input type="text" id="itemPrice" placeholder="$99.99">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeItemModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveItem()">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

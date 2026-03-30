@@ -89,3 +89,67 @@ The application uses a black and white color palette:
 - Backend: Node.js, Express
 - Database: PostgreSQL (Neon)
 - Additional: CORS for API access
+
+## Deployment to Vercel
+
+### Prerequisites
+- A [Vercel account](https://vercel.com/signup)
+- A PostgreSQL database (Neon is recommended)
+- Git repository with your code
+
+### Deployment Steps
+
+1. **Install Vercel CLI** (optional, for command-line deployment):
+   ```bash
+   npm install -g vercel
+   ```
+
+2. **Push your code to a Git repository** (GitHub, GitLab, or Bitbucket)
+
+3. **Deploy via Vercel Dashboard**:
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Add New Project"
+   - Import your Git repository
+   - Configure the project:
+     - Framework Preset: Other
+     - Build Command: (leave empty)
+     - Output Directory: (leave empty)
+     - Install Command: `npm install`
+
+4. **Set Environment Variables**:
+   In the Vercel project settings, add the following environment variable:
+   - `DATABASE_URL`: Your PostgreSQL connection string
+     ```
+     postgresql://username:password@host/database?sslmode=require
+     ```
+
+5. **Deploy**:
+   - Click "Deploy"
+   - Vercel will build and deploy your application
+   - You'll receive a production URL (e.g., `your-app.vercel.app`)
+
+### Alternative: Deploy via CLI
+
+```bash
+# Login to Vercel
+vercel login
+
+# Deploy to production
+vercel --prod
+
+# Add environment variable
+vercel env add DATABASE_URL
+```
+
+### Post-Deployment
+
+- The database tables will be automatically created on first access
+- Test all API endpoints to ensure they work correctly
+- Monitor the Vercel dashboard for any errors or issues
+
+### Important Notes
+
+- Never commit your `.env` file or expose your database credentials
+- Use the `.env.example` file as a template for required environment variables
+- Vercel automatically handles SSL certificates and HTTPS
+- The application will scale automatically based on traffic

@@ -1,4 +1,6 @@
 const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
 
 // PostgreSQL connection
 const pool = new Pool({
@@ -45,6 +47,86 @@ async function initDatabase() {
 // Initialize database on first request
 let dbInitialized = false;
 
+// Read static files
+const indexHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collection Manager</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Collection Manager</h1>
+            <button id="newCollectionBtn" class="btn btn-primary">+ New Collection</button>
+        </header>
+        
+        <div id="collectionsContainer" class="collections-grid"></div>
+    </div>
+
+    <!-- Collection Modal -->
+    <div id="collectionModal" class="modal">
+        <div class="modal-content">
+            <h2 id="collectionModalTitle">New Collection</h2>
+            <form id="collectionForm">
+                <input type="hidden" id="collectionId">
+                <div class="form-group">
+                    <label for="collectionName">Collection Name *</label>
+                    <input type="text" id="collectionName" required>
+                </div>
+                <div class="form-group">
+                    <label for="collectionDescription">Description</label>
+                    <textarea id="collectionDescription" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCollectionModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Item Modal -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <h2 id="itemModalTitle">New Item</h2>
+            <form id="itemForm">
+                <input type="hidden" id="itemId">
+                <input type="hidden" id="itemCollectionId">
+                <div class="form-group">
+                    <label for="itemTitle">Title *</label>
+                    <input type="text" id="itemTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="itemLink">Link *</label>
+                    <input type="url" id="itemLink" required>
+                </div>
+                <div class="form-group">
+                    <label for="itemImage">Image URL</label>
+                    <input type="url" id="itemImage">
+                </div>
+                <div class="form-group">
+                    <label for="itemPrice">Price</label>
+                    <input type="text" id="itemPrice" placeholder="e.g., $29.99">
+                </div>
+                <div class="form-group">
+                    <label for="itemDescription">Description</label>
+                    <textarea id="itemDescription" rows="3"></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeItemModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>`;
+
 module.exports = async (req, res) => {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -63,6 +145,12 @@ module.exports = async (req, res) => {
 
   const { method, url } = req;
   const path = url.split('?')[0];
+
+  // Serve root HTML
+  if (method === 'GET' && path === '/') {
+    res.setHeader('Content-Type', 'text/html');
+    return res.status(200).send(indexHtml);
+  }
 
   try {
     // Get all collections with their items

@@ -144,17 +144,19 @@ module.exports = async (req, res) => {
   }
 
   const { method, url } = req;
-  const path = url.split('?')[0];
+  const urlPath = url.split('?')[0];
+  
+  console.log('Request:', method, urlPath);
 
-  // Serve root HTML
-  if (method === 'GET' && path === '/') {
+  // Serve root HTML for root path or any non-API path
+  if (method === 'GET' && (urlPath === '/' || urlPath === '' || (!urlPath.startsWith('/api') && !urlPath.includes('.')))) {
     res.setHeader('Content-Type', 'text/html');
     return res.status(200).send(indexHtml);
   }
 
   try {
     // Get all collections with their items
-    if (method === 'GET' && path === '/api/collections') {
+    if (method === 'GET' && urlPath === '/api/collections') {
       const collectionsResult = await pool.query(
         'SELECT * FROM collections ORDER BY created_at DESC'
       );
@@ -187,7 +189,7 @@ module.exports = async (req, res) => {
     }
 
     // Create a new collection
-    if (method === 'POST' && path === '/api/collections') {
+    if (method === 'POST' && urlPath === '/api/collections') {
       const { name, description } = req.body;
       
       if (!name) {
@@ -210,8 +212,8 @@ module.exports = async (req, res) => {
     }
 
     // Update a collection
-    if (method === 'PUT' && path.startsWith('/api/collections/')) {
-      const id = path.split('/')[3];
+    if (method === 'PUT' && urlPath.startsWith('/api/collections/')) {
+      const id = urlPath.split('/')[3];
       const { name, description } = req.body;
       
       if (!name) {
@@ -237,8 +239,8 @@ module.exports = async (req, res) => {
     }
 
     // Delete a collection
-    if (method === 'DELETE' && path.startsWith('/api/collections/') && !path.includes('/items')) {
-      const id = path.split('/')[3];
+    if (method === 'DELETE' && urlPath.startsWith('/api/collections/') && !urlPath.includes('/items')) {
+      const id = urlPath.split('/')[3];
       
       const result = await pool.query('DELETE FROM collections WHERE id = $1 RETURNING *', [id]);
       
@@ -250,8 +252,8 @@ module.exports = async (req, res) => {
     }
 
     // Create a new item
-    if (method === 'POST' && path.match(/\/api\/collections\/\d+\/items$/)) {
-      const collectionId = path.split('/')[3];
+    if (method === 'POST' && urlPath.match(/\/api\/collections\/\d+\/items$/)) {
+      const collectionId = urlPath.split('/')[3];
       const { title, image, description, link, price } = req.body;
       
       if (!title || !link) {
@@ -276,8 +278,8 @@ module.exports = async (req, res) => {
     }
 
     // Update an item
-    if (method === 'PUT' && path.startsWith('/api/items/')) {
-      const id = path.split('/')[3];
+    if (method === 'PUT' && urlPath.startsWith('/api/items/')) {
+      const id = urlPath.split('/')[3];
       const { title, image, description, link, price } = req.body;
       
       if (!title || !link) {
@@ -306,8 +308,8 @@ module.exports = async (req, res) => {
     }
 
     // Delete an item
-    if (method === 'DELETE' && path.startsWith('/api/items/')) {
-      const id = path.split('/')[3];
+    if (method === 'DELETE' && urlPath.startsWith('/api/items/')) {
+      const id = urlPath.split('/')[3];
       
       const result = await pool.query('DELETE FROM items WHERE id = $1 RETURNING *', [id]);
       

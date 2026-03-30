@@ -1,20 +1,4 @@
 {
-  "rewrites": [
-    {
-      "source": "/styles.css",
-      "destination": "/api/styles.css"
-    },
-    {
-      "source": "/script.js",
-      "destination": "/api/script.js"
-    },
-    {
-      "source": "/api/:path*",
-      "destination": "/api"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api"
-    }
-  ]
+  "cleanUrls": true,
+  "trailingSlash": false
 }

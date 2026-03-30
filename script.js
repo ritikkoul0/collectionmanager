@@ -1,5 +1,7 @@
-// API Base URL
-const API_URL = 'http://localhost:3000/api';
+// API Base URL - use relative path for Vercel compatibility
+const API_URL = window.location.hostname === 'localhost'
+    ? 'http://localhost:3000/api'
+    : '/api';
 
 // Data structure
 let collections = [];

@@ -66,6 +66,11 @@ async function initDatabase() {
 // Initialize database on startup
 initDatabase();
 
+// Serve index.html at root
+app.get('/', (req, res) => {
+  res.sendFile('index.html', { root: '.' });
+});
+
 // API Routes
 
 // Get all collections with their items

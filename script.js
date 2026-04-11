@@ -38,6 +38,11 @@ async function loadCollections() {
             throw new Error('Failed to fetch collections');
         }
         collections = await response.json();
+        console.log('Loaded collections:', collections);
+        // Log first item of first collection to check discountedPrice field
+        if (collections.length > 0 && collections[0].items.length > 0) {
+            console.log('First item sample:', collections[0].items[0]);
+        }
         renderCollections();
     } catch (error) {
         console.error('Error loading collections:', error);
@@ -323,39 +328,48 @@ async function toggleBought(itemId, currentStatus) {
 // Calculate total price for a collection
 function calculateTotalPrice(collection) {
     if (!collection.items || collection.items.length === 0) {
-        return { original: '₹0.00', discounted: '₹0.00', hasDiscount: false };
+        return { original: '₹0.00', discounted: '₹0.00' };
     }
     
     let originalTotal = 0;
     let discountedTotal = 0;
-    let hasAnyDiscount = false;
     
     collection.items.forEach(item => {
         if (item.price) {
-            // Extract numeric value from price string
-            const priceMatch = item.price.match(/[\d,]+\.?\d*/);
-            if (priceMatch) {
-                const numericPrice = parseFloat(priceMatch[0].replace(/,/g, ''));
-                if (!isNaN(numericPrice)) {
-                    originalTotal += numericPrice;
-                    
-                    // Check if item has discounted price
-                    if (item.discountedPrice) {
+            // Extract numeric value from price string or number
+            let numericPrice;
+            if (typeof item.price === 'number') {
+                numericPrice = item.price;
+            } else {
+                const priceMatch = item.price.match(/[\d,]+\.?\d*/);
+                if (priceMatch) {
+                    numericPrice = parseFloat(priceMatch[0].replace(/,/g, ''));
+                }
+            }
+            
+            if (numericPrice && !isNaN(numericPrice)) {
+                originalTotal += numericPrice;
+                
+                // Check if item has discounted price, if null use original price
+                if (item.discountedPrice != null) {
+                    let numericDiscount;
+                    if (typeof item.discountedPrice === 'number') {
+                        numericDiscount = item.discountedPrice;
+                    } else if (typeof item.discountedPrice === 'string' && item.discountedPrice.trim() !== '') {
                         const discountMatch = item.discountedPrice.match(/[\d,]+\.?\d*/);
                         if (discountMatch) {
-                            const numericDiscount = parseFloat(discountMatch[0].replace(/,/g, ''));
-                            if (!isNaN(numericDiscount)) {
-                                discountedTotal += numericDiscount;
-                                hasAnyDiscount = true;
-                            } else {
-                                discountedTotal += numericPrice;
-                            }
-                        } else {
-                            discountedTotal += numericPrice;
+                            numericDiscount = parseFloat(discountMatch[0].replace(/,/g, ''));
                         }
+                    }
+                    
+                    if (numericDiscount && !isNaN(numericDiscount) && numericDiscount > 0) {
+                        discountedTotal += numericDiscount;
                     } else {
                         discountedTotal += numericPrice;
                     }
+                } else {
+                    // If no discounted price, use original price
+                    discountedTotal += numericPrice;
                 }
             }
         }
@@ -363,8 +377,7 @@ function calculateTotalPrice(collection) {
     
     return {
         original: `₹${originalTotal.toFixed(2)}`,
-        discounted: `₹${discountedTotal.toFixed(2)}`,
-        hasDiscount: hasAnyDiscount
+        discounted: `₹${discountedTotal.toFixed(2)}`
     };
 }
 
@@ -383,6 +396,7 @@ function renderCollections() {
     
     container.innerHTML = collections.map(collection => {
         const totals = calculateTotalPrice(collection);
+        console.log(`Rendering ${collection.name}: Original=${totals.original}, Discounted=${totals.discounted}, Different=${totals.original !== totals.discounted}`);
         return `
         <div class="collection">
             <div class="collection-header">
@@ -390,12 +404,10 @@ function renderCollections() {
                     <div class="collection-title-row">
                         <h2>${escapeHtml(collection.name)}</h2>
                         <div class="collection-total-container">
-                            ${totals.hasDiscount ? `
-                                <span class="collection-total-original">${totals.original}</span>
-                                <span class="collection-total-discounted">Now: ${totals.discounted}</span>
-                            ` : `
-                                <span class="collection-total">${totals.original}</span>
-                            `}
+                            <span class="collection-total">${totals.original}</span>
+                            ${totals.original !== totals.discounted ? `
+                                <span class="collection-total-discounted">${totals.discounted}</span>
+                            ` : ''}
                         </div>
                     </div>
                     ${collection.description ? `<p>${escapeHtml(collection.description)}</p>` : ''}
@@ -440,6 +452,7 @@ function renderItems(collection) {
                             🗑️
                         </button>
                     </div>
+                    ${item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" class="item-image">` : ''}
                     <div class="item-content">
                         <h3 class="item-title">${escapeHtml(item.title)}</h3>
                         ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}

@@ -143,8 +143,9 @@ header h1 {
 
 .collection-total-container {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     padding: 12px 20px;
     border-radius: 12px;
@@ -168,7 +169,7 @@ header h1 {
 }
 
 .collection-total-original {
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: #6b7280;
     text-decoration: line-through;
     font-weight: 500;
@@ -184,7 +185,7 @@ header h1 {
 }
 
 .collection-total-discounted {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: #15803d;
     white-space: nowrap;
@@ -321,7 +322,7 @@ header h1 {
 .item-price-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
 }
 
 .item-price {
@@ -331,16 +332,26 @@ header h1 {
 }
 
 .item-price-original {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: var(--text-secondary);
     text-decoration: line-through;
     font-weight: 500;
+    order: 1;
 }
 
 .item-price-discounted {
-    font-weight: 700;
+    font-weight: 800;
     color: #16a34a;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    order: 2;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.item-price-discounted::before {
+    content: '🎉';
+    font-size: 1.1rem;
 }
 
 .item-link {

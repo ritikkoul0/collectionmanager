@@ -391,10 +391,10 @@ function renderCollections() {
                         <h2>${escapeHtml(collection.name)}</h2>
                         <div class="collection-total-container">
                             ${totals.hasDiscount ? `
-                                <span class="collection-total-original">₹${totals.original.replace('₹', '')}</span>
-                                <span class="collection-total-discounted">Total: ${totals.discounted}</span>
+                                <span class="collection-total-original">${totals.original}</span>
+                                <span class="collection-total-discounted">Now: ${totals.discounted}</span>
                             ` : `
-                                <span class="collection-total">Total: ${totals.original}</span>
+                                <span class="collection-total">${totals.original}</span>
                             `}
                         </div>
                     </div>

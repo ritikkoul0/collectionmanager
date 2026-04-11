@@ -51,6 +51,8 @@ async function initDatabase() {
         description TEXT,
         link TEXT NOT NULL,
         price VARCHAR(50),
+        price_discounted VARCHAR(50),
+        discount_description TEXT,
         bought BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -65,6 +67,32 @@ async function initDatabase() {
           WHERE table_name='items' AND column_name='bought'
         ) THEN
           ALTER TABLE items ADD COLUMN bought BOOLEAN DEFAULT FALSE;
+        END IF;
+      END $$;
+    `);
+    
+    // Add price_discounted column if it doesn't exist (for existing databases)
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name='items' AND column_name='price_discounted'
+        ) THEN
+          ALTER TABLE items ADD COLUMN price_discounted VARCHAR(50);
+        END IF;
+      END $$;
+    `);
+    
+    // Add discount_description column if it doesn't exist (for existing databases)
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name='items' AND column_name='discount_description'
+        ) THEN
+          ALTER TABLE items ADD COLUMN discount_description TEXT;
         END IF;
       END $$;
     `);
@@ -111,6 +139,8 @@ app.get('/api/collections', async (req, res) => {
             description: item.description,
             link: item.link,
             price: item.price,
+            discountedPrice: item.price_discounted,
+            discountDescription: item.discount_description,
             bought: item.bought || false,
             createdAt: item.created_at
           })),
@@ -207,7 +237,7 @@ app.delete('/api/collections/:id', async (req, res) => {
 // Create a new item
 app.post('/api/collections/:collectionId/items', async (req, res) => {
   const { collectionId } = req.params;
-  const { title, image, description, link, price, bought } = req.body;
+  const { title, image, description, link, price, discountedPrice, discountDescription, bought } = req.body;
   
   if (!title || !link) {
     return res.status(400).json({ error: 'Title and link are required' });
@@ -215,8 +245,8 @@ app.post('/api/collections/:collectionId/items', async (req, res) => {
   
   try {
     const result = await pool.query(
-      'INSERT INTO items (collection_id, title, image, description, link, price, bought) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-      [collectionId, title, image || null, description || null, link, price || null, bought || false]
+      'INSERT INTO items (collection_id, title, image, description, link, price, price_discounted, discount_description, bought) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+      [collectionId, title, image || null, description || null, link, price || null, discountedPrice || null, discountDescription || null, bought || false]
     );
     
     const item = result.rows[0];
@@ -227,6 +257,8 @@ app.post('/api/collections/:collectionId/items', async (req, res) => {
       description: item.description,
       link: item.link,
       price: item.price,
+      discountedPrice: item.price_discounted,
+      discountDescription: item.discount_description,
       bought: item.bought || false,
       createdAt: item.created_at
     });
@@ -239,7 +271,7 @@ app.post('/api/collections/:collectionId/items', async (req, res) => {
 // Update an item
 app.put('/api/items/:id', async (req, res) => {
   const { id } = req.params;
-  const { title, image, description, link, price, bought } = req.body;
+  const { title, image, description, link, price, discountedPrice, discountDescription, bought } = req.body;
   
   // If only bought status is being updated
   if (bought !== undefined && !title && !link) {
@@ -261,6 +293,8 @@ app.put('/api/items/:id', async (req, res) => {
         description: item.description,
         link: item.link,
         price: item.price,
+        discountedPrice: item.price_discounted,
+        discountDescription: item.discount_description,
         bought: item.bought || false,
         createdAt: item.created_at
       });
@@ -277,8 +311,8 @@ app.put('/api/items/:id', async (req, res) => {
   
   try {
     const result = await pool.query(
-      'UPDATE items SET title = $1, image = $2, description = $3, link = $4, price = $5, bought = $6 WHERE id = $7 RETURNING *',
-      [title, image || null, description || null, link, price || null, bought !== undefined ? bought : false, id]
+      'UPDATE items SET title = $1, image = $2, description = $3, link = $4, price = $5, price_discounted = $6, discount_description = $7, bought = $8 WHERE id = $9 RETURNING *',
+      [title, image || null, description || null, link, price || null, discountedPrice || null, discountDescription || null, bought !== undefined ? bought : false, id]
     );
     
     if (result.rows.length === 0) {
@@ -293,6 +327,8 @@ app.put('/api/items/:id', async (req, res) => {
       description: item.description,
       link: item.link,
       price: item.price,
+      discountedPrice: item.price_discounted,
+      discountDescription: item.discount_description,
       bought: item.bought || false,
       createdAt: item.created_at
     });

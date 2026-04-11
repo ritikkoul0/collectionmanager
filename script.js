@@ -224,7 +224,8 @@ async function saveItem() {
         image: image,
         description: description,
         link: link,
-        price: price
+        price: price,
+        bought: false
     };
     
     try {
@@ -280,6 +281,32 @@ async function deleteItem(collectionId, itemId) {
     }
 }
 
+// Toggle bought status
+async function toggleBought(itemId, currentStatus) {
+    try {
+        // Convert string to boolean if needed
+        const isBought = currentStatus === true || currentStatus === 'true';
+        
+        const response = await fetch(`${API_URL}/items/${itemId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ bought: !isBought })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to update item status');
+        }
+        
+        await loadCollections();
+    } catch (error) {
+        console.error('Error updating item status:', error);
+        alert('Failed to update item status. Please try again.');
+    }
+}
+
 // Render functions
 function renderCollections() {
     const container = document.getElementById('collectionsContainer');
@@ -330,7 +357,7 @@ function renderItems(collection) {
     return `
         <div class="items-grid">
             ${collection.items.map(item => `
-                <div class="item-card">
+                <div class="item-card ${item.bought ? 'bought' : ''}">
                     <div class="item-actions">
                         <button class="item-action-btn" onclick="openItemModal('${collection.id}', '${item.id}')" title="Edit">
                             ✏️
@@ -339,14 +366,23 @@ function renderItems(collection) {
                             🗑️
                         </button>
                     </div>
+                    <div class="item-checkbox">
+                        <label class="checkbox-container">
+                            <input type="checkbox"
+                                   ${item.bought ? 'checked' : ''}
+                                   onchange="toggleBought('${item.id}', ${item.bought})">
+                            <span class="checkmark"></span>
+                            <span class="checkbox-label">${item.bought ? 'Bought' : 'Mark as bought'}</span>
+                        </label>
+                    </div>
                     <div class="item-content">
                         <h3 class="item-title">${escapeHtml(item.title)}</h3>
                         ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}
                         <div class="item-footer">
                             ${item.price ? `<span class="item-price">${escapeHtml(item.price)}</span>` : '<span></span>'}
-                            <a href="${escapeHtml(item.link)}" 
-                               target="_blank" 
-                               rel="noopener noreferrer" 
+                            <a href="${escapeHtml(item.link)}"
+                               target="_blank"
+                               rel="noopener noreferrer"
                                class="item-link">
                                 View Product →
                             </a>

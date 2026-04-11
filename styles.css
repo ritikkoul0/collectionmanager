@@ -128,10 +128,48 @@ header h1 {
     border-bottom: 1px solid var(--border);
 }
 
+.collection-title-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
 .collection-info h2 {
     font-size: 1.8rem;
     margin-bottom: 8px;
     color: var(--text-primary);
+}
+
+.collection-total-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: var(--background);
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 2px solid var(--primary-color);
+}
+
+.collection-total {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--success);
+    white-space: nowrap;
+}
+
+.collection-total-original {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.collection-total-discounted {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #16a34a;
+    white-space: nowrap;
 }
 
 .collection-info p {
@@ -222,6 +260,29 @@ header h1 {
     overflow: hidden;
 }
 
+.item-discount-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.discount-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.discount-text {
+    font-size: 0.85rem;
+    color: #15803d;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
 .item-footer {
     display: flex;
     justify-content: space-between;
@@ -231,10 +292,29 @@ header h1 {
     border-top: 1px solid var(--border);
 }
 
+.item-price-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .item-price {
     font-weight: 700;
     color: var(--success);
     font-size: 1.1rem;
+}
+
+.item-price-original {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.item-price-discounted {
+    font-weight: 700;
+    color: #16a34a;
+    font-size: 1.2rem;
 }
 
 .item-link {

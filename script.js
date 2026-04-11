@@ -366,15 +366,6 @@ function renderItems(collection) {
                             🗑️
                         </button>
                     </div>
-                    <div class="item-checkbox">
-                        <label class="checkbox-container">
-                            <input type="checkbox"
-                                   ${item.bought ? 'checked' : ''}
-                                   onchange="toggleBought('${item.id}', ${item.bought})">
-                            <span class="checkmark"></span>
-                            <span class="checkbox-label">${item.bought ? 'Bought' : 'Mark as bought'}</span>
-                        </label>
-                    </div>
                     <div class="item-content">
                         <h3 class="item-title">${escapeHtml(item.title)}</h3>
                         ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}
@@ -386,6 +377,15 @@ function renderItems(collection) {
                                class="item-link">
                                 View Product →
                             </a>
+                        </div>
+                        <div class="item-checkbox">
+                            <label class="checkbox-container">
+                                <input type="checkbox"
+                                       ${item.bought ? 'checked' : ''}
+                                       onchange="toggleBought('${item.id}', ${item.bought})">
+                                <span class="checkmark"></span>
+                                <span class="checkbox-label">${item.bought ? 'Bought' : 'Mark as bought'}</span>
+                            </label>
                         </div>
                     </div>
                 </div>

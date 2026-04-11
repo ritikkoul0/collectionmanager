@@ -144,32 +144,58 @@ header h1 {
 .collection-total-container {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    background: var(--background);
-    padding: 8px 16px;
-    border-radius: 8px;
-    border: 2px solid var(--primary-color);
+    gap: 6px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 2px solid #86efac;
+    box-shadow: 0 2px 8px rgba(134, 239, 172, 0.2);
 }
 
 .collection-total {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    color: var(--success);
+    color: #15803d;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.collection-total::before {
+    content: '💰';
+    font-size: 1.2rem;
 }
 
 .collection-total-original {
-    font-size: 1rem;
-    color: var(--text-secondary);
+    font-size: 0.95rem;
+    color: #6b7280;
     text-decoration: line-through;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.collection-total-original::before {
+    content: 'Was:';
+    font-weight: 600;
+    text-decoration: none;
 }
 
 .collection-total-discounted {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #16a34a;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #15803d;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.collection-total-discounted::before {
+    content: '🎉';
+    font-size: 1.2rem;
 }
 
 .collection-info p {
@@ -614,5 +640,6 @@ header h1 {
 .item-card {
     animation: fadeIn 0.5s ease;
 }
+
 
 

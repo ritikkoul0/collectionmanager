@@ -51,8 +51,22 @@ async function initDatabase() {
         description TEXT,
         link TEXT NOT NULL,
         price VARCHAR(50),
+        bought BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
+    `);
+    
+    // Add bought column if it doesn't exist (for existing databases)
+    await client.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name='items' AND column_name='bought'
+        ) THEN
+          ALTER TABLE items ADD COLUMN bought BOOLEAN DEFAULT FALSE;
+        END IF;
+      END $$;
     `);
 
     console.log('Database tables initialized successfully');
@@ -97,6 +111,7 @@ app.get('/api/collections', async (req, res) => {
             description: item.description,
             link: item.link,
             price: item.price,
+            bought: item.bought || false,
             createdAt: item.created_at
           })),
           createdAt: collection.created_at
@@ -192,7 +207,7 @@ app.delete('/api/collections/:id', async (req, res) => {
 // Create a new item
 app.post('/api/collections/:collectionId/items', async (req, res) => {
   const { collectionId } = req.params;
-  const { title, image, description, link, price } = req.body;
+  const { title, image, description, link, price, bought } = req.body;
   
   if (!title || !link) {
     return res.status(400).json({ error: 'Title and link are required' });
@@ -200,8 +215,8 @@ app.post('/api/collections/:collectionId/items', async (req, res) => {
   
   try {
     const result = await pool.query(
-      'INSERT INTO items (collection_id, title, image, description, link, price) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [collectionId, title, image || null, description || null, link, price || null]
+      'INSERT INTO items (collection_id, title, image, description, link, price, bought) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [collectionId, title, image || null, description || null, link, price || null, bought || false]
     );
     
     const item = result.rows[0];
@@ -212,6 +227,7 @@ app.post('/api/collections/:collectionId/items', async (req, res) => {
       description: item.description,
       link: item.link,
       price: item.price,
+      bought: item.bought || false,
       createdAt: item.created_at
     });
   } catch (err) {
@@ -223,16 +239,46 @@ app.post('/api/collections/:collectionId/items', async (req, res) => {
 // Update an item
 app.put('/api/items/:id', async (req, res) => {
   const { id } = req.params;
-  const { title, image, description, link, price } = req.body;
+  const { title, image, description, link, price, bought } = req.body;
   
+  // If only bought status is being updated
+  if (bought !== undefined && !title && !link) {
+    try {
+      const result = await pool.query(
+        'UPDATE items SET bought = $1 WHERE id = $2 RETURNING *',
+        [bought, id]
+      );
+      
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Item not found' });
+      }
+      
+      const item = result.rows[0];
+      return res.json({
+        id: item.id.toString(),
+        title: item.title,
+        image: item.image,
+        description: item.description,
+        link: item.link,
+        price: item.price,
+        bought: item.bought || false,
+        createdAt: item.created_at
+      });
+    } catch (err) {
+      console.error('Error updating item status:', err);
+      return res.status(500).json({ error: 'Failed to update item status' });
+    }
+  }
+  
+  // Full item update
   if (!title || !link) {
     return res.status(400).json({ error: 'Title and link are required' });
   }
   
   try {
     const result = await pool.query(
-      'UPDATE items SET title = $1, image = $2, description = $3, link = $4, price = $5 WHERE id = $6 RETURNING *',
-      [title, image || null, description || null, link, price || null, id]
+      'UPDATE items SET title = $1, image = $2, description = $3, link = $4, price = $5, bought = $6 WHERE id = $7 RETURNING *',
+      [title, image || null, description || null, link, price || null, bought !== undefined ? bought : false, id]
     );
     
     if (result.rows.length === 0) {
@@ -247,6 +293,7 @@ app.put('/api/items/:id', async (req, res) => {
       description: item.description,
       link: item.link,
       price: item.price,
+      bought: item.bought || false,
       createdAt: item.created_at
     });
   } catch (err) {

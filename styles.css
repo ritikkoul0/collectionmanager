@@ -288,10 +288,9 @@ header h1 {
 }
 
 .item-checkbox {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 10;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
 }
 
 .checkbox-container {
@@ -299,17 +298,11 @@ header h1 {
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
     transition: all 0.2s ease;
 }
 
-.checkbox-container:hover {
-    background: white;
-    border-color: var(--primary-color);
-    box-shadow: 0 2px 8px var(--shadow);
+.checkbox-container:hover .checkbox-label {
+    color: var(--primary-color);
 }
 
 .checkbox-container input[type="checkbox"] {
@@ -321,14 +314,16 @@ header h1 {
 }
 
 .checkbox-label {
-    font-size: 0.85rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     color: var(--text-primary);
     white-space: nowrap;
+    user-select: none;
 }
 
 .item-card.bought .checkbox-label {
-    color: var(--success);
+    text-decoration: line-through;
+    opacity: 0.7;
 }
 
 .checkmark {

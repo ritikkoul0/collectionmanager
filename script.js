@@ -182,6 +182,8 @@ function openItemModal(collectionId, itemId = null) {
         document.getElementById('itemDescription').value = item.description || '';
         document.getElementById('itemLink').value = item.link;
         document.getElementById('itemPrice').value = item.price || '';
+        document.getElementById('itemDiscountedPrice').value = item.discountedPrice || '';
+        document.getElementById('itemDiscountDescription').value = item.discountDescription || '';
     } else {
         title.textContent = 'Add New Item';
         itemIdInput.value = '';
@@ -190,6 +192,8 @@ function openItemModal(collectionId, itemId = null) {
         document.getElementById('itemDescription').value = '';
         document.getElementById('itemLink').value = '';
         document.getElementById('itemPrice').value = '';
+        document.getElementById('itemDiscountedPrice').value = '';
+        document.getElementById('itemDiscountDescription').value = '';
     }
     
     modal.classList.add('show');
@@ -208,6 +212,8 @@ async function saveItem() {
     const description = document.getElementById('itemDescription').value.trim();
     const link = document.getElementById('itemLink').value.trim();
     const price = document.getElementById('itemPrice').value.trim();
+    const discountedPrice = document.getElementById('itemDiscountedPrice').value.trim();
+    const discountDescription = document.getElementById('itemDiscountDescription').value.trim();
     
     if (!title) {
         alert('Please enter an item title');
@@ -219,12 +225,19 @@ async function saveItem() {
         return;
     }
     
+    if (!price) {
+        alert('Please enter a price');
+        return;
+    }
+    
     const itemData = {
         title: title,
         image: image,
         description: description,
         link: link,
         price: price,
+        discountedPrice: discountedPrice,
+        discountDescription: discountDescription,
         bought: false
     };
     
@@ -307,6 +320,54 @@ async function toggleBought(itemId, currentStatus) {
     }
 }
 
+// Calculate total price for a collection
+function calculateTotalPrice(collection) {
+    if (!collection.items || collection.items.length === 0) {
+        return { original: '₹0.00', discounted: '₹0.00', hasDiscount: false };
+    }
+    
+    let originalTotal = 0;
+    let discountedTotal = 0;
+    let hasAnyDiscount = false;
+    
+    collection.items.forEach(item => {
+        if (item.price) {
+            // Extract numeric value from price string
+            const priceMatch = item.price.match(/[\d,]+\.?\d*/);
+            if (priceMatch) {
+                const numericPrice = parseFloat(priceMatch[0].replace(/,/g, ''));
+                if (!isNaN(numericPrice)) {
+                    originalTotal += numericPrice;
+                    
+                    // Check if item has discounted price
+                    if (item.discountedPrice) {
+                        const discountMatch = item.discountedPrice.match(/[\d,]+\.?\d*/);
+                        if (discountMatch) {
+                            const numericDiscount = parseFloat(discountMatch[0].replace(/,/g, ''));
+                            if (!isNaN(numericDiscount)) {
+                                discountedTotal += numericDiscount;
+                                hasAnyDiscount = true;
+                            } else {
+                                discountedTotal += numericPrice;
+                            }
+                        } else {
+                            discountedTotal += numericPrice;
+                        }
+                    } else {
+                        discountedTotal += numericPrice;
+                    }
+                }
+            }
+        }
+    });
+    
+    return {
+        original: `₹${originalTotal.toFixed(2)}`,
+        discounted: `₹${discountedTotal.toFixed(2)}`,
+        hasDiscount: hasAnyDiscount
+    };
+}
+
 // Render functions
 function renderCollections() {
     const container = document.getElementById('collectionsContainer');
@@ -320,11 +381,23 @@ function renderCollections() {
     
     emptyState.classList.remove('show');
     
-    container.innerHTML = collections.map(collection => `
+    container.innerHTML = collections.map(collection => {
+        const totals = calculateTotalPrice(collection);
+        return `
         <div class="collection">
             <div class="collection-header">
                 <div class="collection-info">
-                    <h2>${escapeHtml(collection.name)}</h2>
+                    <div class="collection-title-row">
+                        <h2>${escapeHtml(collection.name)}</h2>
+                        <div class="collection-total-container">
+                            ${totals.hasDiscount ? `
+                                <span class="collection-total-original">₹${totals.original.replace('₹', '')}</span>
+                                <span class="collection-total-discounted">Total: ${totals.discounted}</span>
+                            ` : `
+                                <span class="collection-total">Total: ${totals.original}</span>
+                            `}
+                        </div>
+                    </div>
                     ${collection.description ? `<p>${escapeHtml(collection.description)}</p>` : ''}
                 </div>
                 <div class="collection-actions">
@@ -341,7 +414,8 @@ function renderCollections() {
             </div>
             ${renderItems(collection)}
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderItems(collection) {
@@ -369,8 +443,21 @@ function renderItems(collection) {
                     <div class="item-content">
                         <h3 class="item-title">${escapeHtml(item.title)}</h3>
                         ${item.description ? `<p class="item-description">${escapeHtml(item.description)}</p>` : ''}
+                        ${item.discountDescription ? `
+                            <div class="item-discount-info">
+                                <span class="discount-icon">💳</span>
+                                <span class="discount-text">${escapeHtml(item.discountDescription)}</span>
+                            </div>
+                        ` : ''}
                         <div class="item-footer">
-                            ${item.price ? `<span class="item-price">${escapeHtml(item.price)}</span>` : '<span></span>'}
+                            <div class="item-price-container">
+                                ${item.discountedPrice ? `
+                                    <span class="item-price-original">${escapeHtml(item.price)}</span>
+                                    <span class="item-price-discounted">${escapeHtml(item.discountedPrice)}</span>
+                                ` : `
+                                    <span class="item-price">${escapeHtml(item.price)}</span>
+                                `}
+                            </div>
                             <a href="${escapeHtml(item.link)}"
                                target="_blank"
                                rel="noopener noreferrer"

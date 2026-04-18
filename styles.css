@@ -310,6 +310,29 @@ header h1 {
     line-height: 1.4;
 }
 
+.item-emi-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #eff6ff;
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+}
+
+.emi-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.emi-text {
+    font-size: 0.85rem;
+    color: #1d4ed8;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
 .item-footer {
     display: flex;
     justify-content: space-between;
@@ -576,7 +599,8 @@ header h1 {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
     width: 100%;
     padding: 12px;
     background: var(--background);
@@ -589,7 +613,8 @@ header h1 {
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);

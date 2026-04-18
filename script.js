@@ -189,6 +189,7 @@ function openItemModal(collectionId, itemId = null) {
         document.getElementById('itemPrice').value = item.price || '';
         document.getElementById('itemDiscountedPrice').value = item.discountedPrice || '';
         document.getElementById('itemDiscountDescription').value = item.discountDescription || '';
+        document.getElementById('itemEmiDuration').value = item.emiDuration || '';
     } else {
         title.textContent = 'Add New Item';
         itemIdInput.value = '';
@@ -199,6 +200,7 @@ function openItemModal(collectionId, itemId = null) {
         document.getElementById('itemPrice').value = '';
         document.getElementById('itemDiscountedPrice').value = '';
         document.getElementById('itemDiscountDescription').value = '';
+        document.getElementById('itemEmiDuration').value = '';
     }
     
     modal.classList.add('show');
@@ -219,6 +221,7 @@ async function saveItem() {
     const price = document.getElementById('itemPrice').value.trim();
     const discountedPrice = document.getElementById('itemDiscountedPrice').value.trim();
     const discountDescription = document.getElementById('itemDiscountDescription').value.trim();
+    const emiDuration = document.getElementById('itemEmiDuration').value;
     
     if (!title) {
         alert('Please enter an item title');
@@ -243,6 +246,7 @@ async function saveItem() {
         price: price,
         discountedPrice: discountedPrice,
         discountDescription: discountDescription,
+        emiDuration: emiDuration,
         bought: false
     };
     
@@ -460,6 +464,12 @@ function renderItems(collection) {
                             <div class="item-discount-info">
                                 <span class="discount-icon">💳</span>
                                 <span class="discount-text">${escapeHtml(item.discountDescription)}</span>
+                            </div>
+                        ` : ''}
+                        ${item.emiDuration ? `
+                            <div class="item-emi-info">
+                                <span class="emi-icon">🏦</span>
+                                <span class="emi-text">EMI: ${escapeHtml(item.emiDuration)}</span>
                             </div>
                         ` : ''}
                         <div class="item-footer">
